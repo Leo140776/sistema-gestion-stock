@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Título */
+        .titulo-principal {
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* --- ESTILOS DE STOCK BLINDADOS --- */
+
+        /* CRÍTICO (Rojo suave - Letra Blanca) */
+        /* Aplicamos a la fila Y a las celdas para vencer a Bootstrap */
+        .table tr.stock-critico, 
+        .table tr.stock-critico > td {
+            background-color: #ef5350 !important; /* Rojo suave */
+            color: white !important;
+            font-weight: normal;
+        }
+
+        /* NORMAL (Verde suave - Letra Blanca) */
+        .table tr.stock-ok, 
+        .table tr.stock-ok > td {
+            background-color: #66bb6a !important; /* Verde suave */
+            color: white !important;
+            font-weight: normal;
+        }
+
+        /* Arreglar el HOVER (Cuando pasas el mouse por encima) */
+        /* Para que no se ponga gris, sino un poco más oscuro del color que ya tiene */
+        .table-hover tbody tr.stock-critico:hover > td {
+            background-color: #e53935 !important; /* Rojo un pelín más oscuro */
+            color: white !important;
+        }
+        .table-hover tbody tr.stock-ok:hover > td {
+            background-color: #43a047 !important; /* Verde un pelín más oscuro */
+            color: white !important;
+        }
+
+        /* Asegurar que los botones/enlaces sean blancos */
+        .stock-critico a, .stock-ok a {
+            color: white !important;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="titulo-principal mb-4">Lista de Productos</h2>
+        
+        <div th:if="${mensajeAlerta}" class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+            <strong style="font-size: 1.1rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${mensajeAlerta}"></span>
+            </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> <span th:text="${mensajeExito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="mb-3 d-flex justify-content-between">
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+            <a th:href="@{/productos/nuevo}" class="btn btn-primary" 
+               sec:authorize="hasAnyRole('ADMINISTRADOR', 'GERENTE')">Nuevo Producto</a>
+        </div>
+
+        <table class="table table-bordered table-hover shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>SKU</th>
+                    <th>Nombre</th>
+                    <th>Medida o Tamaño</th>
+                    <th>Stock Actual</th>
+                    <th>Stock Mínimo</th>
+                    <th sec:authorize="hasAnyRole('ADMINISTRADOR', 'GERENTE')">Herramientas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="prod : ${productos}" 
+                    th:classappend="${prod.stockActual <= prod.stockMinimo} ? 'stock-critico' : 'stock-ok'">
+                    
+                    <td th:text="${prod.sku}"></td>
+                    <td th:text="${prod.nombre}"></td>
+                    <td th:text="${prod.medidaTamano}"></td>
+                    <td th:text="${prod.stockActual}"></td>
+                    <td th:text="${prod.stockMinimo}"></td>
+                    
+                    <td class="text-center" sec:authorize="hasAnyRole('ADMINISTRADOR', 'GERENTE')">
+                        <a th:href="@{/productos/editar/{id}(id=${prod.id})}" class="btn btn-sm btn-light border" title="Editar">✏️</a>
+                        <a th:href="@{/productos/eliminar/{id}(id=${prod.id})}" class="btn btn-sm btn-light border" 
+                           onclick="return confirm('¿Eliminar este producto?');" title="Eliminar">🗑️</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card mt-4 mb-5 shadow-sm">
+            <div class="card-body bg-light">
+                <h5 class="card-title fw-bold mb-3" style="font-family: Arial, sans-serif;">Referencias de Stock:</h5>
+                <div class="d-flex align-items-center mb-2">
+                    <div style="width: 25px; height: 25px; background-color: #66bb6a; border-radius: 4px; margin-right: 10px;"></div>
+                    <span><strong>Normal:</strong> El stock actual es superior al mínimo requerido. (Fondo Verde)</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div style="width: 25px; height: 25px; background-color: #ef5350; border-radius: 4px; margin-right: 10px;"></div>
+                    <span><strong>Crítico:</strong> El stock actual es igual o inferior al mínimo. Se recomienda reponer. (Fondo Rojo)</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
