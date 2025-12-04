@@ -1,12 +1,11 @@
 package com.traversol.gestion_stock.controller;
 
 import com.traversol.gestion_stock.model.Producto;
-import com.traversol.gestion_stock.repository.ProductoRepository; // Ajusta si usas Service
-import jakarta.validation.Valid;
+import com.traversol.gestion_stock.repository.ProductoRepository;
+import com.traversol.gestion_stock.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -14,47 +13,59 @@ import org.springframework.web.bind.annotation.*;
 public class ProductoController {
 
     @Autowired
-    private ProductoRepository productoRepository; // O tu ProductoService
+    private ProductoService productoService;
+
+    @Autowired
+    private ProductoRepository productoRepository;
 
     @GetMapping
     public String listarProductos(Model model) {
-        model.addAttribute("productos", productoRepository.findAll());
-        return "producto_list"; // Apunta al HTML producto_list.html
+        model.addAttribute("productos", productoService.listarTodos());
+        // CORRECCIÓN AQUÍ: Antes decía "productos", ahora apunta al archivo real "producto_list"
+        return "producto_list"; 
     }
 
     @GetMapping("/nuevo")
-    public String mostrarFormularioNuevo(Model model) {
-        model.addAttribute("producto", new Producto());
-        return "producto_form"; // Apunta al HTML producto_form.html
+    public String mostrarFormularioDeRegistrarProducto(Model model) {
+        Producto producto = new Producto();
+        model.addAttribute("producto", producto);
+        return "producto_form"; // Apunta a producto_form.html
     }
 
     @PostMapping("/guardar")
-    public String guardarProducto(@Valid @ModelAttribute("producto") Producto producto, 
-                                  BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            return "producto_form"; // Si hay errores, vuelve al formulario mostrando las alertas
-        }
+    public String guardarProducto(@ModelAttribute("producto") Producto producto, Model model) {
         
-        // Si es nuevo (id nulo), inicializa stocks si vienen nulos (opcional, por seguridad)
-        if (producto.getId() == null) {
-            if(producto.getStockActual() == null) producto.setStockActual(0);
-        }
+        // --- VALIDACIÓN DE SKU DUPLICADO ---
+        // Si es nuevo (ID nulo) y el SKU ya existe...
+        if (producto.getId() == null && productoRepository.existsBySku(producto.getSku())) {
+            
+            Long maxSku = productoRepository.obtenerMaxSku();
+            Long siguienteSku = (maxSku != null) ? (maxSku + 1) : 1;
 
-        productoRepository.save(producto);
+            model.addAttribute("error", "¡Atención! El SKU " + producto.getSku() + " ya existe.");
+            model.addAttribute("sugerencia", "Disponible: " + siguienteSku);
+            
+            // Devolvemos lo que escribió el usuario para que no se borre
+            model.addAttribute("producto", producto);
+            
+            // Volvemos al formulario para que corrija
+            return "producto_form"; 
+        }
+        // ------------------------------------
+
+        productoService.guardarProducto(producto);
         return "redirect:/productos";
     }
 
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Integer id, Model model) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID inválido: " + id));
-        model.addAttribute("producto", producto);
-        return "producto_form";
+    public String mostrarFormularioDeEditar(@PathVariable Long id, Model model) {
+        model.addAttribute("producto", productoService.obtenerProductoPorId(id));
+        return "producto_form"; // Reusamos el mismo formulario
     }
 
     @GetMapping("/eliminar/{id}")
-    public String eliminarProducto(@PathVariable Integer id) {
-        productoRepository.deleteById(id);
+    public String eliminarProducto(@PathVariable Long id) {
+        productoService.eliminarProducto(id);
         return "redirect:/productos";
     }
 }
