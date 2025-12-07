@@ -21,9 +21,9 @@
     <div th:if="${error}" class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
         <div>
             <strong th:text="${error}"></strong>
-            <span class="ms-2" th:text="${sugerencia}" id="textoSugerencia"></span>
+            <span class="ms-2" th:if="${sugerencia}" th:text="${sugerencia}" id="textoSugerencia"></span>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-danger bg-white text-danger fw-bold" onclick="usarSugerencia()">
+        <button th:if="${sugerencia}" type="button" class="btn btn-sm btn-outline-danger bg-white text-danger fw-bold" onclick="usarSugerencia()">
             Usar Sugerencia
         </button>
     </div>
@@ -38,7 +38,7 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold">SKU (único) <span class="text-danger">*</span></label>
-            <input type="text" id="sku" name="sku" th:field="*{sku}" class="form-control" required>
+            <input type="number" min="0" id="sku" name="sku" th:field="*{sku}" class="form-control" required>
         </div>
 
         <div class="mb-3">
@@ -53,12 +53,12 @@
 
         <div class="mb-3">
             <label class="form-label fw-bold">Stock Inicial <span class="text-danger">*</span></label>
-            <input type="number" name="stockInicial" th:field="*{stockInicial}" class="form-control" required>
+            <input type="number" min="0" name="stockInicial" th:field="*{stockInicial}" class="form-control" required>
         </div>
 
         <div class="mb-4">
             <label class="form-label fw-bold">Stock Mínimo <span class="text-danger">*</span></label>
-            <input type="number" name="stockMinimo" th:field="*{stockMinimo}" class="form-control" required>
+            <input type="number" min="0" name="stockMinimo" th:field="*{stockMinimo}" class="form-control" required>
         </div>
 
         <div class="d-flex gap-2">
@@ -70,9 +70,14 @@
 
 <script th:inline="javascript">
     function usarSugerencia() {
-        var texto = document.getElementById("textoSugerencia").innerText;
-        var numero = texto.match(/\d+/)[0]; 
-        document.getElementById("sku").value = numero;
+        var elementoTexto = document.getElementById("textoSugerencia");
+        if(elementoTexto) {
+            var texto = elementoTexto.innerText;
+            var numero = texto.match(/\d+/); 
+            if(numero) {
+                document.getElementById("sku").value = numero[0];
+            }
+        }
     }
 </script>
 
