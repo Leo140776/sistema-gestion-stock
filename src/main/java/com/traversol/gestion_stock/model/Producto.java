@@ -19,12 +19,12 @@ public class Producto {
     @Column(name = "medida_tamano")
     private String medidaTamano;
 
-    // Inicializamos en 0 para evitar errores si no vienen del formulario
+    // Campos obligatorios según tu SRS
     @Column(name = "stock_inicial")
-    private Integer stockInicial = 0;
+    private Integer stockInicial;
 
     @Column(name = "stock_actual")
-    private Integer stockActual = 0;
+    private Integer stockActual;
 
     @Column(name = "stock_minimo")
     private Integer stockMinimo;
@@ -45,9 +45,10 @@ public class Producto {
     public void setMedidaTamano(String medidaTamano) { this.medidaTamano = medidaTamano; }
 
     public Integer getStockInicial() { return stockInicial; }
+    
+    // TRUCO: Al poner el Stock Inicial, llenamos también el Actual si está vacío
     public void setStockInicial(Integer stockInicial) { 
         this.stockInicial = stockInicial;
-        // Si es nuevo y stockActual es nulo, lo igualamos al inicial (que será 0)
         if (this.stockActual == null) {
             this.stockActual = stockInicial;
         }

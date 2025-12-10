@@ -35,8 +35,10 @@
     <form th:action="@{/productos/guardar}" th:object="${producto}" method="POST">
         
         <input type="hidden" th:field="*{id}">
+        
         <input type="hidden" th:field="*{stockActual}">
-        <input type="hidden" th:field="*{stockInicial}">
+        
+        <input type="hidden" th:if="${producto.id != null}" th:field="*{stockInicial}">
 
         <div class="mb-3">
             <label class="form-label fw-bold">SKU (único) <span class="text-danger">*</span></label>
@@ -51,6 +53,16 @@
         <div class="mb-3">
             <label class="form-label fw-bold">Medida o Tamaño <span class="text-danger">*</span></label>
             <input type="text" name="medidaTamano" th:field="*{medidaTamano}" class="form-control" required>
+        </div>
+
+        <div class="mb-3" th:if="${producto.id == null}">
+            <label class="form-label fw-bold">Stock Inicial <span class="text-danger">*</span></label>
+            <input type="number" min="0" name="stockInicial" th:field="*{stockInicial}" class="form-control" required>
+        </div>
+        <div class="mb-3" th:if="${producto.id != null}">
+            <label class="form-label fw-bold">Stock Actual</label>
+            <input type="text" class="form-control" th:value="${producto.stockActual}" disabled>
+            <small class="text-muted">El stock solo se modifica mediante Ingresos/Egresos.</small>
         </div>
 
         <div class="mb-4">
