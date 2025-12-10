@@ -102,7 +102,8 @@
                     </td>
                     <td th:text="${t.producto != null ? t.producto.nombre : 'Eliminado'}"></td>
                     <td th:text="${t.cantidad}" class="fw-bold text-center"></td>
-                    <td th:text="${t.motivo}"></td>
+                    
+                    <td th:text="${t.motivo == 'Producción' ? 'Producción/Fabricación' : t.motivo}"></td>
                     
                     <td th:text="${t.observaciones != null ? t.observaciones : ''}"></td>
                 </tr>
@@ -118,7 +119,8 @@
 
 <script th:inline="javascript">
     
-    const motivosIngreso = ["Producción", "Devolución", "Ajuste Inventario", "Otros"];
+    // CORREGIDO: "Otro" en singular para que coincida con tu Base de Datos
+    const motivosIngreso = ["Producción", "Devolución", "Ajuste Inventario", "Otro"];
     const motivosEgreso = ["Venta", "Rotura", "Desperdicio", "Ajuste Inventario", "Donación"];
 
     const motivoPrevio = /*[[${param.motivo}]]*/ '';
@@ -138,8 +140,9 @@
 
         opciones.forEach(m => {
             let option = document.createElement("option");
-            option.value = m;
+            option.value = m; // Valor que se envía al servidor
             
+            // TRUCO VISUAL: Mostramos el texto amigable
             if (m === "Producción") {
                 option.text = "Producción/Fabricación";
             } else {
