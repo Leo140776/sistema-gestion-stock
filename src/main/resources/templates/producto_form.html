@@ -16,7 +16,7 @@
 <body>
 
 <div class="container">
-    <h2 class="mb-4 fw-bold">Agregar Producto Nuevo</h2>
+    <h2 class="mb-4 fw-bold" th:text="${producto.id == null ? 'Agregar Producto Nuevo' : 'Editar Producto'}"></h2>
 
     <div th:if="${error}" class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
         <div>
@@ -35,6 +35,8 @@
     <form th:action="@{/productos/guardar}" th:object="${producto}" method="POST">
         
         <input type="hidden" th:field="*{id}">
+        <input type="hidden" th:field="*{stockActual}">
+        <input type="hidden" th:field="*{stockInicial}">
 
         <div class="mb-3">
             <label class="form-label fw-bold">SKU (único) <span class="text-danger">*</span></label>
@@ -49,11 +51,6 @@
         <div class="mb-3">
             <label class="form-label fw-bold">Medida o Tamaño <span class="text-danger">*</span></label>
             <input type="text" name="medidaTamano" th:field="*{medidaTamano}" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Stock Inicial <span class="text-danger">*</span></label>
-            <input type="number" min="0" name="stockInicial" th:field="*{stockInicial}" class="form-control" required>
         </div>
 
         <div class="mb-4">

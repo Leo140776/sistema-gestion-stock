@@ -19,13 +19,12 @@ public class Producto {
     @Column(name = "medida_tamano")
     private String medidaTamano;
 
-    // Columna para el stock inicial (lo que ingresas en el formulario)
+    // Inicializamos en 0 para evitar errores si no vienen del formulario
     @Column(name = "stock_inicial")
-    private Integer stockInicial;
+    private Integer stockInicial = 0;
 
-    // Columna para el stock actual (se debería mantener igual al inicial al crear)
     @Column(name = "stock_actual")
-    private Integer stockActual;
+    private Integer stockActual = 0;
 
     @Column(name = "stock_minimo")
     private Integer stockMinimo;
@@ -48,7 +47,7 @@ public class Producto {
     public Integer getStockInicial() { return stockInicial; }
     public void setStockInicial(Integer stockInicial) { 
         this.stockInicial = stockInicial;
-        // Truco: Al setear el inicial, seteamos también el actual para que no sea nulo
+        // Si es nuevo y stockActual es nulo, lo igualamos al inicial (que será 0)
         if (this.stockActual == null) {
             this.stockActual = stockInicial;
         }
